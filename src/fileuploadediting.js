@@ -80,20 +80,23 @@ export default class FileUploadEditing extends Plugin {
 				return fileTypes.test( file.type );
 			} );
 
-			const ranges = data.targetRanges.map( viewRange => editor.editing.mapper.toModelRange( viewRange ) );
+			if ( !files.length ) {
+				return;
+			}
 
+			evt.stop();
+			
 			editor.model.change( writer => {
 				// Set selection to paste target.
-				writer.setSelection( ranges );
-
-				if ( files.length ) {
-					evt.stop();
-
-					// Upload files after the selection has changed in order to ensure the command's state is refreshed.
-					editor.model.enqueueChange( 'default', () => {
-						editor.execute( 'fileUpload', { file: files } );
-					} );
+				if ( data.targetRanges ) {
+					writer.setSelection( data.targetRanges.map( viewRange => editor.editing.mapper.toModelRange( viewRange ) ) );
 				}
+
+				// Upload files after the selection has changed in order to ensure the command's state is refreshed.
+				editor.model.enqueueChange( 'default', () => {
+					editor.execute( 'fileUpload', { file: files } );
+				} );
+				
 			} );
 		} );
 
