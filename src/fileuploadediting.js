@@ -178,7 +178,7 @@ export default class FileUploadEditing extends Plugin {
 		const fileRepository = editor.plugins.get( FileRepository );
 		const notification = editor.plugins.get( Notification );
 
-		model.enqueueChange( 'transparent', writer => {
+		model.enqueueChange( { isUndoable: false }, writer => {
 			writer.setAttribute( 'uploadStatus', 'reading', fileElement );
 		} );
 
@@ -186,15 +186,15 @@ export default class FileUploadEditing extends Plugin {
 			.then( () => {
 				const promise = loader.upload();
 
-				model.enqueueChange( 'transparent', writer => {
+				model.enqueueChange( { isUndoable: false }, writer => {
 					writer.setAttribute( 'uploadStatus', 'uploading', fileElement );
 				} );
 
 				return promise;
 			} )
 			.then( data => {
-				model.enqueueChange( 'transparent', writer => {
-					writer.setAttributes( { uploadStatus: 'complete', linkHref: data.resourceUrl }, fileElement );
+				model.enqueueChange( { isUndoable: false }, writer => {
+					writer.setAttributes( { uploadStatus: 'complete', linkHref: data.default }, fileElement );
 				} );
 
 				clean();
@@ -217,13 +217,13 @@ export default class FileUploadEditing extends Plugin {
 				clean();
 
 				// Permanently remove file from insertion batch.
-				model.enqueueChange( 'transparent', writer => {
+				model.enqueueChange( { isUndoable: false }, writer => {
 					writer.remove( fileElement );
 				} );
 			} );
 
 		function clean() {
-			model.enqueueChange( 'transparent', writer => {
+			model.enqueueChange( { isUndoable: false }, writer => {
 				writer.removeAttribute( 'uploadId', fileElement );
 				writer.removeAttribute( 'uploadStatus', fileElement );
 			} );
